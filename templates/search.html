@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>REPORT / ICE STORM</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    </head>
+    <body>
+        <header>
+            <h1 class="projectname">ICE STORM</h1>
+            <form action="export" method="post">
+                <input id="report" type="text" name="results" value="{{ results }}" required/>
+                <input id="exportbtn" type="submit" value="Export CSV"/>
+            </form>
+        </header>
+        <main class="search">
+            <div id="information" class="block">
+            {% for info in information %}
+                {% if "|reportmail" in info %}
+                    <a class="abuse-btn" href="mailto:{{ info.replace("|reportmail", "") }}?subject=Phishing site: {{ domain.replace(".", "[.]") }}&amp;body=To whom it may concern,%0A%0AThe following website recently came to my attention: hxxps://{{ domain.replace(".", "[.]") }}%0A%0ADespite what it is pretending, this is a phishing site and not the official website.%0A%0AYou are providing services to the people operating the Website while it is very obviously being used for fraud.%0AI'm writing to request that you take it down as soon as possible%0A%0AYours faithfully." target="_blank"><h2>report | {{ info.replace("|reportmail", "") }}</h2></a>
+                {% elif "|img" in info %}
+                    <img src="{{ info.replace("|img", "") }}">
+                {% else %}
+                    <h2>{{ info }}</h2>
+                {% endif %}
+            {% endfor %}
+            </div>
+            <div class="results">
+                {% for record in records %}
+                <div class="block">
+                    <h2 class="title">{{ record }}</h2>
+                    {% for i in records[record] %}
+                        {% if "|clear" in i %}
+                            <h2 class="clear">{{ i.replace("|clear", "") }}</h2>
+                        {% elif "|suspicious" in i %}
+                            <h2 class="suspicious">{{ i.replace("|suspicious", "") }}</h2>
+                        {% elif "|malicious" in i %}
+                            <h2 class="malicious">{{ i.replace("|malicious", "") }}</h2>
+                        {% elif "|reportlink" in i %}
+                            <a class="abuse-btn" href="{{ i.replace("|reportlink", "") }}" target="_blank"><h2>report</h2></a>
+                        {% else %}
+                            <h2>{{ i }}</h2>
+                        {% endif %}
+                    {% endfor %}
+                </div>
+                {% endfor %}
+            </div>
+        </main>
+    </body>
+</html>

@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <title>ICE STORM</title>
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="preconnect" href="https://fonts.googleapis.com">
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+        <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@600&display=swap" rel="stylesheet">
+
+        <link href="{{ url_for('static', filename='style.css') }}" rel="stylesheet">
+    </head>
+    <body>
+        <main class="index">
+            <h1 class="projectname">ICE STORM</h1>
+            <form action="search" method="post">
+                <input id="search" type="text" name="url" autocapitalize="none" autocomplete="off" autocorrect="off" spellcheck="false" placeholder="Search URL or domain" required/>
+                <input id="btn" type="submit" value="🌠"/>
+            </form>
+        </main>
+    </body>
+</html>
