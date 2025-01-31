@@ -13,6 +13,8 @@ from modules.metadefender import MetaDefender
 from modules.yasafebrowsing import ya_check
 from modules.tranco import domain_raiting
 from modules.netcraft import netcraft_submit
+from modules.metamask import metamask_list
+from modules.openphish import openphish_list
 from config import *
 import time
 
@@ -30,7 +32,7 @@ class report_api:
         try:
             whois_data = whois.whois(self.domain)
         except whois.parser.PywhoisError:
-            abort(503, "The domain isn't found in WhoIs")
+            return
 
         if not len(self.domain.split(".")) > 2:
             try:
@@ -75,8 +77,8 @@ class report_api:
 
     def urlscan(self) -> None:
         self.report_content["UrlScan"] = []
-
         scan = UrlScan(US_API)
+        
         try:
             scan.submit_url(self.url)
             scan.get_results()
@@ -115,19 +117,23 @@ class report_api:
 
     def virustotal(self) -> None:
         self.report_content["VirusTotal"] = []
-
         vt = virustotal_python.Virustotal(VT_API)
+        
         try:
             if self.is_domain is True:
                 results = vt.request("urls", data={"url": self.domain}, method="POST")
             else:
                 results = vt.request("urls", data={"url": self.url}, method="POST")
+            
             url_id = urlsafe_b64encode(self.url.encode()).decode().strip("=")
-            for _ in range(40):
+
+            for _ in range(15):
                 try:
                     results = vt.request(f"urls/{url_id}")
+                    
                     if results.data["attributes"]["last_analysis_stats"]["undetected"] == 0:
                         raise ValueError()
+                    
                     break
                 except (virustotal_python.virustotal.VirustotalError, ValueError):
                     time.sleep(2)
@@ -136,9 +142,9 @@ class report_api:
             suspicious = results.data["attributes"]["last_analysis_stats"]["suspicious"]
             undetected = results.data["attributes"]["last_analysis_stats"]["undetected"]
 
-            self.report_content["VirusTotal"].append(f"Malicious: {malicious}|malicious")
-            self.report_content["VirusTotal"].append(f"Suspicious: {suspicious}|suspicious")
-            self.report_content["VirusTotal"].append(f"Undetected: {undetected}|clear")
+            self.report_content["VirusTotal"].append(f"{malicious}|malicious")
+            self.report_content["VirusTotal"].append(f"{suspicious}|suspicious")
+            self.report_content["VirusTotal"].append(f"{undetected}|clear")
         except Exception:
             self.report_content["VirusTotal"].append("Failed")
 
@@ -148,10 +154,12 @@ class report_api:
         try:
             md = MetaDefender(MD_API)
             md.submit_domain(self.domain)
+
             if md.detected > 0:
-                self.report_content["MetaDefender"].append(f"{md.detected} / {md.allengines}|malicious")
+                self.report_content["MetaDefender"].append(f"{md.detected}|malicious")
+                self.report_content["MetaDefender"].append(f"{md.allengines-md.detected}|clear")
             else:
-                self.report_content["MetaDefender"].append(f"{md.detected} / {md.allengines}|clear")
+                self.report_content["MetaDefender"].append(f"{md.allengines}|clear")
         except Exception as e:
             self.report_content["MetaDefender"].append("Failed")
 
@@ -159,11 +167,12 @@ class report_api:
         self.report_content["Yandex Status"] = []
 
         result = ya_check(self.url)
+
         if len(result["info"]) > 0 and "threat" in result["info"][0]:
             if result["info"][0]["threat"] == "fraud.phishing":
                 self.report_content["Yandex Status"].append("Malicious|malicious")
         else:
-            self.report_content["Yandex Status"].append("Not Found")
+            self.report_content["Yandex Status"].append("Clear|clear")
             self.report_content["Yandex Status"].append(f"https://yandex.com/support/search/troubleshooting/delspam.html|reportlink")
 
     def wayback_machine(self) -> None:
@@ -202,3 +211,23 @@ class report_api:
             self.report_content["Netcraft"].append(f"https://report.netcraft.com/submission/{netcraft_id}|reportlink")
         except ValueError:
             self.report_content["Netcraft"].append("Already submitted")
+
+    def metamask(self) -> None:
+        self.report_content["Metamask"] = []
+
+        result = metamask_list(self.domain)
+
+        if result is True:
+            self.report_content["Metamask"].append("Malicious|malicious")
+        else:
+            self.report_content["Metamask"].append("Clear|clear")
+
+    def openphish(self) -> None:
+        self.report_content["OpenPhish Feed"] = []
+
+        result = openphish_list(self.domain)
+
+        if result is True:
+            self.report_content["OpenPhish Feed"].append("Malicious|malicious")
+        else:
+            self.report_content["OpenPhish Feed"].append("Clear|clear")

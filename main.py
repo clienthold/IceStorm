@@ -1,15 +1,15 @@
 from flask import Flask
 from flask import request
 from flask import render_template
-from flask import abort
 from flask import send_file
 from api import report_api
 from modules.reportgen import create_csv
 import threading
 import validators
-import requests
 import io
 from ast import literal_eval as make_tuple
+from datetime import datetime, timedelta, timezone
+import functools
 import webbrowser
 from config import *
 
@@ -18,9 +18,28 @@ if (not SB_API) or (not VT_API) or (not US_API) or (not MD_API):
 
 app = Flask(__name__)
 
+def timed_cache(**timedelta_kwargs):                                              
+                                                                                  
+    def _wrapper(f):                                                              
+        update_delta = timedelta(**timedelta_kwargs)                              
+        next_update = datetime.now(timezone.utc) + update_delta
+        f = functools.lru_cache(None)(f)
+                                                                 
+        @functools.wraps(f)                                                       
+        def _wrapped(*args, **kwargs):                                            
+            nonlocal next_update
+            now = datetime.now(timezone.utc)
+            if now >= next_update:
+                f.cache_clear()
+                next_update = now + update_delta
+            return f(*args, **kwargs)
+        return _wrapped
+    return _wrapper
+
+@timed_cache(seconds=300)
 def create_report(url: str, is_domain=False) -> tuple:
     report = report_api(url, is_domain)
-    todo = [report.whois, report.urlscan, report.safe_browsing, report.virustotal, report.metadefender, report.yandex_status, report.wayback_machine, report.threatminer, report.netcraft]
+    todo = [report.whois, report.urlscan, report.safe_browsing, report.virustotal, report.metadefender, report.yandex_status, report.wayback_machine, report.threatminer, report.netcraft, report.metamask, report.openphish]
     threads = []
 
     for i in todo:
@@ -49,7 +68,7 @@ def search():
             results = create_report(f"https://{url}/", is_domain=True)
         else:
             results = create_report(url)
-    
+
         return render_template("search.html", results=results, domain=results[0], information=results[1], records=results[2])
     else:
         return "Invalid search query"
@@ -68,5 +87,5 @@ def exportcsv():
     return send_file(mem, download_name="report.csv", mimetype="text/csv", as_attachment=True)
 
 if __name__ == "__main__":
-    webbrowser.open("http://127.0.0.1:9000/", new=2)
-    app.run(host="127.0.0.1", port=9000)
+    webbrowser.open("http://localhost:9000/", new=2)
+    app.run(host="localhost", port=9000)

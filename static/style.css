@@ -137,8 +137,6 @@ main.search {
     flex-wrap: wrap;
     gap: 25px;
     margin-top: 20px;
-    width: 98%;
-    height: 98%;
 }
 
 .block {
@@ -169,6 +167,19 @@ main.search {
     border-radius: 10px;
     background-color: #505050;
     overflow: hidden;
+}
+
+.inline {
+    display: flex;
+    justify-content: space-around;
+    gap: 0.4rem;
+}
+
+.inline > h2 {
+    width: 100%;
+    padding: 0.5rem;
+    text-align: center;
+    border-radius: 15px;
 }
 
 .abuse-btn {

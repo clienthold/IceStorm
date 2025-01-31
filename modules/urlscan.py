@@ -1,5 +1,4 @@
 import requests
-import json
 import time
 
 class DnsError(Exception):
@@ -15,8 +14,10 @@ class UrlScan:
         }
     
     def submit_url(self, url: str):
-        data = {"url": url, "visibility": "public", "tags": ["Ice Storm"]}
+        data = {"url": url, "visibility": "public", "tags": ["Ice_Storm ToolKit"]}
+        
         r = requests.post("https://urlscan.io/api/v1/scan/", headers=self.headers, json=data)
+        
         if r.status_code == 200:
             self.api_results = r.json()["api"]
         elif r.status_code == 400:
