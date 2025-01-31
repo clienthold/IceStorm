@@ -3,7 +3,7 @@
 
 ## ⚙️ Features
 
-- Integrations with [UrlScan](https://urlscan.io/), [Google Safe Browsing](https://safebrowsing.google.com/), [VirusTotal](https://www.virustotal.com/), [MetaDefender](https://metadefender.opswat.com/), [Yandex Safe Browsing](https://yandex.ru/safety/), [Wayback Machine](https://web.archive.org/), [ThreatMiner](https://www.threatminer.org/), [NetCraft](https://www.netcraft.com/)
+- Integrations with [UrlScan](https://urlscan.io/), [Google Safe Browsing](https://safebrowsing.google.com/), [VirusTotal](https://www.virustotal.com/), [MetaDefender](https://metadefender.opswat.com/), [Yandex Safe Browsing](https://yandex.ru/safety/), [Wayback Machine](https://web.archive.org/), [ThreatMiner](https://www.threatminer.org/), [NetCraft](https://www.netcraft.com/), [Metamask](https://metamask.io/), [OpenPhish](https://openphish.com/)
 - Automatic generation of emails for domain registrars
 - Generation of csv reports based on all information
 
@@ -22,12 +22,15 @@ Insert the necessary **API keys** into the ```config.py``` configuration file
 SB_API = ""
 
 # VIRUSTOTAL API KEY
+# https://www.virustotal.com/gui/user/<USERNAME>/apikey
 VT_API = ""
 
 # URLSCAN API KEY
+# https://urlscan.io/user/profile/
 US_API = ""
 
 # METADEFENDER API KEY
+# https://metadefender.opswat.com/account
 MD_API = ""
 ```
 
